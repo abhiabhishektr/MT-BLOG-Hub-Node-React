@@ -6,25 +6,20 @@ import sendResponse from '../utils/response';
 
 // Signup
 export const signup = async (req: Request, res: Response): Promise<void> => {
-  const { firstName, lastName, phone, email, dob, password, preferences } = req.body;
+  const { firstName, lastName, email, password } = req.body;
+  console.log("firstName, lastName, email, password: ", firstName, lastName, email, password);
 
   // Check for required fields
-  if (!firstName || !lastName || !phone || !email || !dob || !password) {
+  if (!firstName || !lastName || !email || !password) {
     sendResponse(res, 400, 'All fields are required');
     return;
   }
 
   try {
-    const existingUser = await User.findOne({
-      $or: [{ email: email }, { phone: phone }],
-    });
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      if (existingUser.email === email) {
-        sendResponse(res, 409, 'Email is already in use');
-      } else if (existingUser.phone === phone) {
-        sendResponse(res, 409, 'Phone number is already in use');
-      }
+      sendResponse(res, 409, 'Email is already in use');
       return;
     }
 
@@ -32,33 +27,28 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     const newUser = new User({
       firstName,
       lastName,
-      phone,
       email,
-      dob,
       password,
-      preferences,
     });
 
     const savedUser = await newUser.save();
-    
+
     // Generate JWT token
     const token = jwt.sign({ id: savedUser._id }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
-    
-    sendResponse(res, 201, 'User created successfully', { token });
+
+    sendResponse(res, 201, 'User created successfully', { token , user: savedUser.firstName });
   } catch (error) {
+    console.log("error: ", error);
     sendResponse(res, 400, 'Error creating user');
   }
 };
 
 // Login
 export const login = async (req: Request, res: Response): Promise<void> => {
-   
   const { identifier, password } = req.body;
 
   try {
-    const user = await User.findOne({
-      $or: [{ email: identifier }, { phone: identifier }],
-    });
+    const user = await User.findOne({ email: identifier });
 
     if (!user || !(await user.comparePassword(password))) {
       sendResponse(res, 401, 'Invalid credentials');
@@ -66,7 +56,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
-    sendResponse(res, 200, 'Login successful', { token , user: user.firstName});
+    sendResponse(res, 200, 'Login successful', { token, user: user.firstName });
   } catch (error) {
     sendResponse(res, 500, 'Internal server error');
   }

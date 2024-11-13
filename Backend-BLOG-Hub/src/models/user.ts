@@ -5,22 +5,16 @@ export interface IUser extends Document {
     id: string;
     firstName: string;
     lastName: string;
-    phone: string;
     email: string;
-    dob: Date;
     password: string;
-    preferences: string[];
     comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 const UserSchema: Schema = new Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    phone: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
-    dob: { type: Date, required: true },
     password: { type: String, required: true },
-    preferences: { type: [String], default: [] },
 });
 
 // Hash password before saving
