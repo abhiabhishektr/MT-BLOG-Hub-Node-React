@@ -1,0 +1,53 @@
+name: Build Frontend and Backend
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  backend-build:
+    name: Build Backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Backend-BLOG-Hub
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' # Specify your Node.js version
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Run backend build
+        run: yarn build
+
+  frontend-build:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    needs: backend-build # Ensures backend builds before frontend starts
+    defaults:
+      run:
+        working-directory: ./Frontend-BLOG-Hub
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Run frontend build
+        run: yarn build
