@@ -96,6 +96,7 @@ export const updatePost = async (req: Request, res: Response): Promise<void> => 
         }
 
         const { title, content, removedImages } = req.body;
+        console.log("req.body;: ", req.body);
         const images = req.files ? (req.files as Express.Multer.File[]).map(file => file.path) : [];
 
         // Find the post by ID
@@ -114,6 +115,7 @@ export const updatePost = async (req: Request, res: Response): Promise<void> => 
         // Update the title and content if provided
         post.title = title || post.title;
         post.content = content || post.content;
+        post.category = req.body.category || post.category;
 
         // Handle image removal: Remove the images that are in the `removedImages` array
         if (removedImages && removedImages.length > 0) {
@@ -132,6 +134,7 @@ export const updatePost = async (req: Request, res: Response): Promise<void> => 
         // Send the response with the updated post
         sendResponse(res, 200, 'Post updated successfully', formatPostResponse(updatedPost));
     } catch (error) {
+        console.log("error: ", error);
         sendResponse(res, 500, 'Error updating post');
     }
 };

@@ -66,10 +66,12 @@ export const getUserPosts = async (): Promise<IGetPostsResponse> => {
 
 // Update a post
 export const updatePost = async (id: string, updatedData: IUpdatePost): Promise<void> => {
+  console.log("updatedData: ", updatedData);
   const formData = new FormData();
 
   if (updatedData.title) formData.append('title', updatedData.title);
   if (updatedData.content) formData.append('content', updatedData.content);
+  if (updatedData.tag) formData.append('category', updatedData.tag);
   if (updatedData.image1) {
     formData.append('images', updatedData.image1);
   }
