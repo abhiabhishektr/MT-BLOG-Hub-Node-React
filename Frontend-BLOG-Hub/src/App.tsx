@@ -9,7 +9,6 @@ import PublicRoute from './components/PublicRoute';
 import DashboardPage from './pages/DashboardPage.jsx';
 import { AuthProvider } from './context/AuthContext';
 import LandingPage from './components/LandingPage';
-import Temp from './components/temp';
 import Navbar from '@/components/Navbar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import SingleBlogPage from './pages/SingleBlogPage.js';
@@ -26,7 +25,7 @@ const App: React.FC = () => {
             <Route element={<PublicRoute />}>
               <Route path="/register" element={<RegistrationPage />} />
               <Route path="/login" element={<LoginPage />} />
-              <Route path="/temp" element={<Temp />} />
+              {/* <Route path="/temp" element={<Temp />} /> */}
             </Route>
             <Route path="/" element={<LandingPage />} />
             <Route element={<PrivateRoute />}>

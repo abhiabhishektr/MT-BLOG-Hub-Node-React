@@ -1,5 +1,5 @@
 // src/api/postApi.ts
-import { ICreatePost, BlogPost, IPostResponse, IGetPostsResponse, IUpdatePost, IGetPostByIdResponse } from '../types'
+import { ICreatePost , IGetPostsResponse, IUpdatePost, IGetPostByIdResponse } from '../types'
 import api from './clientApi'; // Your API client instance
 
 // Create a new post

@@ -5,9 +5,10 @@ const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  const openGitHubLink = () => {
-    window.open('https://github.com/abhiabhishektr', '_blank');
-  };
+  // const openGitHubLink = () => {
+  //   window.open('https://github.com/abhiabhishektr', '_blank');
+  // };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-orange-200 relative flex flex-col lg:flex-row items-center justify-center overflow-hidden">

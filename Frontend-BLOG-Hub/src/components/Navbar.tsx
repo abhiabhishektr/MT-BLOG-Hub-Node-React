@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+// import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext'; // Import the useAuth hook
-import { FaCog, FaSignOutAlt } from 'react-icons/fa'; // Import settings icon from react-icons
+import {  FaSignOutAlt } from 'react-icons/fa'; // Import settings icon from react-icons
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
