@@ -33,7 +33,8 @@ const formSchema = z.object({
   tag: z.enum(['Technology', 'Science', 'Space']),
 }).superRefine((data, ctx) => {
   const hasNewImages = data.image1 instanceof File || data.image2 instanceof File;
-  const hasExistingImages = (data.images?.length || 0) > 0;
+  // TODO 
+  // const hasExistingImages = (data.images?.length || 0) > 0;
   const removedImagesCount = data.removedImages?.length || 0;
   const remainingExistingImages = (data.images?.length || 0) - removedImagesCount;
 
