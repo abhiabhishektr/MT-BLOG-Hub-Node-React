@@ -26,20 +26,24 @@ import { BASE_URL } from '@/config'
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   content: z.string().min(1, 'Content is required'),
-  image1: z.any().optional(),
-  image2: z.any().optional(),
+  image1: z.any(),
+  image2: z.any(),
   images: z.array(z.string()).optional(),
   removedImages: z.array(z.string()).optional(),
   tag: z.enum(['Technology', 'Science', 'Space']),
-}).refine((data) => {
-  //@ts-ignore
-  const hasImages = data.image1 || data.image2 || (data?.images?.length > 0); // Safely accessing images
-  //@ts-ignore
-  const remainingImages = data?.images?.length - (data?.removedImages?.length || 0); // Safely handling undefined
-  return hasImages && remainingImages > 0;
-}, {
-  message: "At least one image is required",
-  path: ['image1'],
+}).superRefine((data, ctx) => {
+  const hasNewImages = data.image1 instanceof File || data.image2 instanceof File;
+  const hasExistingImages = (data.images?.length || 0) > 0;
+  const removedImagesCount = data.removedImages?.length || 0;
+  const remainingExistingImages = (data.images?.length || 0) - removedImagesCount;
+
+  if (!hasNewImages && !remainingExistingImages) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "At least one image is required",
+      path: ['image1']
+    });
+  }
 });
 
 type BlogFormValues = z.infer<typeof formSchema>
@@ -51,29 +55,21 @@ interface BlogFormProps {
 }
 
 export function BlogForm({ initialValues, onSubmit, submitLabel }: BlogFormProps) {
-  console.log("initialValues: ", initialValues);
-
   const form = useForm<BlogFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialValues || {
-      title: '',
-      content: '',
-      tag: 'Technology',
-      removedImages: []
+    defaultValues: {
+      title: initialValues?.title || '',
+      content: initialValues?.content || '',
+      tag: initialValues?.tag || 'Technology',
+      images: initialValues?.images || [],
+      removedImages: [],
+      image1: undefined,
+      image2: undefined
     }
   });
 
-  const [image1Preview, setImage1Preview] = React.useState<string | null>(initialValues?.images?.[0] || null);
-  const [image2Preview, setImage2Preview] = React.useState<string | null>(initialValues?.images?.[1] || null);
-
-  React.useEffect(() => {
-    if (initialValues?.images?.[0]) {
-      setImage1Preview(`${BASE_URL}/${initialValues.images[0]}`);
-    }
-    if (initialValues?.images?.[1]) {
-      setImage2Preview(`${BASE_URL}/${initialValues.images[1]}`);
-    }
-  }, [initialValues]);
+  const [image1Preview, setImage1Preview] = React.useState<string | null>(initialValues?.images?.[0] ? `${BASE_URL}/${initialValues.images[0]}` : null);
+  const [image2Preview, setImage2Preview] = React.useState<string | null>(initialValues?.images?.[1] ? `${BASE_URL}/${initialValues.images[1]}` : null);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, imageField: 'image1' | 'image2') => {
     const file = event.target.files?.[0];
@@ -88,23 +84,43 @@ export function BlogForm({ initialValues, onSubmit, submitLabel }: BlogFormProps
       };
       reader.readAsDataURL(file);
       form.setValue(imageField, file);
+      form.trigger(); // Trigger validation after setting new image
     }
   };
 
   const handleImageDelete = (imageField: 'image1' | 'image2') => {
+    const imageIndex = imageField === 'image1' ? 0 : 1;
+    const existingImage = initialValues?.images?.[imageIndex];
+
     if (imageField === 'image1') {
       setImage1Preview(null);
       form.setValue('image1', undefined);
-      form.setValue('removedImages', [...(form.getValues('removedImages') || []), initialValues?.images?.[0] || '']);
     } else {
       setImage2Preview(null);
       form.setValue('image2', undefined);
-      form.setValue('removedImages', [...(form.getValues('removedImages') || []), initialValues?.images?.[1] || '']);
     }
+
+    if (existingImage) {
+      const currentRemoved = form.getValues('removedImages') || [];
+      form.setValue('removedImages', [...currentRemoved, existingImage]);
+    }
+
+    form.trigger(); // Trigger validation after removing image
   };
+
+  const handleSubmit = (data: BlogFormValues) => {
+    // Filter out undefined image fields
+    const formData = {
+      ...data,
+      image1: data.image1 instanceof File ? data.image1 : undefined,
+      image2: data.image2 instanceof File ? data.image2 : undefined,
+    };
+    onSubmit(formData);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full max-w-7xl mx-auto px-4 py-8">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8 w-full max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-8">
             <FormField
